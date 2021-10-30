@@ -10,6 +10,7 @@ import com.deitel.redtesttask1_dollarcoursechecker.Constants
 import com.deitel.redtesttask1_dollarcoursechecker.R
 import com.deitel.redtesttask1_dollarcoursechecker.api.BankResponse
 import com.deitel.redtesttask1_dollarcoursechecker.api.BankService
+import com.mili.workmanagerandpendingnotification.SharedPrefHelpers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,7 +37,7 @@ class CheckDollarCourseWorker(context: Context, workerParams: WorkerParameters) 
         if (response.isSuccessful()) {
             val bankResponse: BankResponse? = response.body()
             if(getCorrectFloatFromString(bankResponse?.records?.get(bankResponse.records.size - 1)?.value)
-                > getCorrectFloatFromString(bankResponse?.records?.get(bankResponse.records.size - 2)?.value)
+                > getCorrectFloatFromString(SharedPrefHelpers.readFromSharedPreferences(applicationContext,"LAST_RECORD_VALUE",""))
             ) {
                 val builder = NotificationCompat.Builder(applicationContext,
                     Constants.CHANNEL_ID_PERIOD_WORK

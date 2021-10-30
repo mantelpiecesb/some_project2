@@ -10,6 +10,7 @@ import com.deitel.redtesttask1_dollarcoursechecker.DateProvider.toString
 import com.deitel.redtesttask1_dollarcoursechecker.api.BankService
 import com.deitel.redtesttask1_dollarcoursechecker.db.DollarCourseDatabase
 import com.deitel.redtesttask1_dollarcoursechecker.model.Record
+import com.mili.workmanagerandpendingnotification.SharedPrefHelpers
 
 import javax.inject.Inject
 
@@ -29,6 +30,7 @@ class BankPagingSource @Inject constructor (private val service: BankService, pr
 
             var response = service.searchDollarCourse(data_req1 = dateAgoString, data_req2 = dateInString)
             var myMutableList = response.records
+
 
             val position = params.key ?: 0
             Log.d("PAGING SOURCE LOADING", "position: " + position)

@@ -21,6 +21,9 @@ interface DollarCourseDao {
     )
     fun recordsByName(): PagingSource<Int, Record>
 
+    @Query("SELECT * FROM dollar_course_records WHERE id=(SELECT max(id) FROM dollar_course_records)")
+    fun getLastRecord(): Record
+
     @Query("DELETE FROM dollar_course_records")
     suspend fun clearRecords()
 }

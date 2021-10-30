@@ -8,15 +8,16 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.work.*
 import com.deitel.redtesttask1_dollarcoursechecker.R
 import com.deitel.redtesttask1_dollarcoursechecker.appComp
 import com.deitel.redtesttask1_dollarcoursechecker.data.BankRepository
 import com.deitel.redtesttask1_dollarcoursechecker.databinding.ActivityMainBinding
-import com.deitel.redtesttask1_dollarcoursechecker.databinding.RecyclerviewItemBinding
+import com.deitel.redtesttask1_dollarcoursechecker.db.DollarCourseDatabase
 import com.deitel.redtesttask1_dollarcoursechecker.workManager.CheckDollarCourseWorker
+import com.mili.workmanagerandpendingnotification.SharedPrefHelpers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -58,8 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.adapter = pagingAdapter
 
-        lifecycleScope.launch {
-            mViewModel.searchData().collectLatest { pagingData -> pagingAdapter.submitData(pagingData) }
+        lifecycleScope.launch { mViewModel.searchData().collectLatest { pagingData -> pagingAdapter.submitData(pagingData) }
         }
 
         if (WorkManager.getInstance(this).getWorkInfosByTag("periodic-pending-notification").get() == emptyList<WorkInfo>()) {
@@ -76,10 +76,20 @@ class MainActivity : AppCompatActivity() {
             WorkManager.getInstance(this).enqueueUniquePeriodicWork("periodic-pending-notification", ExistingPeriodicWorkPolicy.KEEP, uploadWorkRequest
             )
         }
+
+        lifecycleScope.launch(Dispatchers.Default) { saveLastRecordValue() }
+
     }
 
     fun provideViewModelFactory(context: Context, owner: SavedStateRegistryOwner): ViewModelProvider.Factory {
         return ViewModelFactory(this,owner, repository)
+    }
+
+    private fun saveLastRecordValue() {
+        val dollarCourseDatabase = DollarCourseDatabase.getInstance(this)
+        SharedPrefHelpers.writeToSharedPreferences(applicationContext,"LAST_RECORD_VALUE",
+            dollarCourseDatabase.recordsDao().getLastRecord().value.toString())
+        //Log.d("SAVED PREFS: ", SharedPrefHelpers.readFromSharedPreferences(applicationContext,"LAST_RECORD_VALUE","").toString())
     }
 
 
